@@ -2,6 +2,9 @@ from embed_funcs import WordEmbeddings
 import sys
 import numpy as np
 
+HALF_BATCH_SIZE = 128
+rng = check_random_state(0)
+
 def cosine_similarity(a_matrix, b_matrix):
     return ((a_matrix * b_matrix).sum(axis=1)) / ((a_matrix.norm(2, axis = 1))*(b_matrix.norm(2, axis = 1)))
 

@@ -22,11 +22,11 @@ class WordEmbeddings(object):
 		vec_fs = open(vec_file)
 		line = vec_fs.readline()
 		tokens = line.split()
-		self.num_words = int(tokens[0])
-		self.embedding_dim = int(tokens[1])
-		self.vectors = np.zeros((self.num_words, self.embedding_dim))
-		self.counts = np.zeros(self.num_words, dtype=int)
-		self.probs = np.ones(self.num_words)
+		self.counts = np.zeros(self.num_words, dtype=int)                       # count of each word in vocab
+		self.num_words = int(tokens[0])                                         # number of unique words( size of vocab)
+		self.embedding_dim = int(tokens[1])                                     # embedding dimensions (typically 300)
+		self.vectors = np.zeros((self.num_words, self.embedding_dim))           # Embedding matrix
+		self.probs = np.ones(self.num_words)                                    # word probabilities
 		for i, line in enumerate(vec_fs):
 			tokens = line.split()
 			word = tokens[0]
@@ -40,7 +40,7 @@ class WordEmbeddings(object):
 			word, count = tokens[0], int(tokens[1])
 			self.counts[self.word_dict[word]] = count
 
-		self.total_count = self.counts.sum()
+		self.total_count = self.counts.sum()                                # total number of words
 		self.probs = self.probs * self.counts
 		self.probs = self.probs / self.total_count   # calculating all probabilities
 
