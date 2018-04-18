@@ -11,13 +11,13 @@ class WordEmbeddings(object):
 		self.words = []
 		self.embedding_dim = 0
 		self.vectors = np.zeros((0, 0))
-		self.counts = np.zeros(0, dtype=int)
+		# self.counts = np.zeros(0, dtype=int)
         self.probs = np.zeros(0)
         self.word_dict = dict([])
 
-	def load_from_word2vec(self, file_prefix):
-		vocab_file = file_prefix + '.vocab'
-		vec_file = file_prefix + '.w2v'
+	def load_from_fasttext(self, file_prefix):
+		# vocab_file = file_prefix + '.vocab'
+		vec_file = file_prefix + '.vec'
                 
 		vec_fs = open(vec_file)
 		line = vec_fs.readline()
@@ -43,6 +43,9 @@ class WordEmbeddings(object):
 		self.total_count = self.counts.sum()                                # total number of words
 		self.probs = self.probs * self.counts
 		self.probs = self.probs / self.total_count   # calculating all probabilities
+
+
+	# def downsample_frequent_words(self,
 
 	def downsample_frequent_words(self, frequency_threshold = 1e-3):
 		threshold_count = float(frequency_threshold * self.total_count)

@@ -1,4 +1,4 @@
-from gensim.models import FastText
+from gensim.models import FastText, Word2Vec
 import sys, gensim, logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -13,10 +13,10 @@ class LoadFile(object):
     def __init__(self, filename):
         self.filename = filename
     def __iter__(self):
-        for line in open('./'+self.filename):
+        for line in open(self.filename):
             yield line.split()
 
 
 sentences_ted = LoadFile(fname)
-model_ted = FastText(sentences_ted, size=300, window=5, min_count=4, workers=4,sg=1)
+model_ted = Word2Vec(sentences_ted, size=100, window=5, min_count=4, workers=4,sg=1)
 model.save('./models/hin')
