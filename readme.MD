@@ -12,3 +12,6 @@ trained with adversarial autoencoder[https://arxiv.org/pdf/1608.02996.pdf]
 - [x] Code for loading Embeddings and batch sampling of embeddings
 - [ ] Obtaining pre-trained/training word vectors of English and another language(Hindi or German)
 - [ ] Writing the auto encoder GAN model with loaded word vectors
+
+## Details
+- hosted on ner@10.4.16.160:~/suhan 
