@@ -1,4 +1,4 @@
-from gensim.models import FastText
+from gensim.models import Word2Vec
 import sys, gensim, logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -18,5 +18,5 @@ class LoadFile(object):
 
 
 sentences_ted = LoadFile(fname)
-model_ted = FastText(sentences_ted, size=100, window=5, min_count=4, workers=4,sg=1)
-model.save('./models/eng')
+model_ted = Word2Vec(sentences_ted, size=100, window=5, min_count=4, workers=4,sg=1)
+model_ted.save('./models/English/eng')

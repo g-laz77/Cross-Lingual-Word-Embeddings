@@ -10,8 +10,11 @@ trained with adversarial autoencoder[https://arxiv.org/pdf/1608.02996.pdf]
 
 ## Tasks
 - [x] Code for loading Embeddings and batch sampling of embeddings
-- [ ] Obtaining pre-trained/training word vectors of English and another language(Hindi or German)
-- [ ] Writing the auto encoder GAN model with loaded word vectors
+- [x] Obtaining pre-trained/training word vectors of English and another language(Hindi or German)
+- [ ] Writing and testing the auto encoder GAN model with loaded word vectors
 
 ## Details
-- hosted on ner@10.4.16.160:~/suhan 
+- Scripts/code hosted on ner@10.4.16.160:~/suhan/Cross-Lingual-Word-Embeddings
+- Dataset hosted on ner@10.4.16.160:~/suhan/datasets 
+- Word2vec models hosted on ner@10.4.16.160:~/suhan/Cross-Lingual-Word-Embeddings/models
+

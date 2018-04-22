@@ -36,6 +36,7 @@ if __name__ == '__main__':
         i = i + 1
         if (i % 10000 == 0):
             logger.info("Saved " + str(i) + " articles")
+            print("whatsup")
  
     output.close()
     logger.info("Finished Saved " + str(i) + " articles")
