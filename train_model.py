@@ -11,7 +11,7 @@ def cosine_similarity(a_matrix, b_matrix):
 
 print('Loading Hindi embeddings...')
 we_hi = WordEmbeddings()
-we_hi.load_from_fasttext('./datasets/wiki.hi/wiki.hi')
+we_hi.load_from_word2vec('./models/wv_hindi')
 we_hi.downsample_frequent_words()
 skn_hi = StandardScaler()
 we_hi.vectors = skn_hi.fit_transform(we_hi.vectors).astype(theano.config.floatX)
@@ -19,7 +19,7 @@ we_batches_hi = we_hi.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rn
 
 print >> sys.stderr, 'Loading English embeddings...'
 we_en = WordEmbeddings()
-we_en.load_from_word2vec('./datasets/wiki.en/wiki.en')
+we_en.load_from_word2vec('./models/wv_english')
 we_en.downsample_frequent_words()
 skn_en = StandardScaler()
 we_en.vectors = skn_en.fit_transform(we_en.vectors).astype(theano.config.floatX)

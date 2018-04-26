@@ -165,22 +165,21 @@ def save_model():
 	params_vals = lasagne.layers.get_all_param_values([discriminator_0.l_out, discriminator_1.l_out, gen_l_out])
 	cPickle.dump(params_vals, open(MODEL_FILENAME, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL)
 
-print >> sys.stderr, 'Loading German embeddings...'
-we_it = WordEmbeddings()
-we_it.load_from_word2vec('./de-m50000')
-we_it.downsample_frequent_words()
-skn_it = StandardScaler()
-we_it.vectors = skn_it.fit_transform(we_it.vectors).astype(theano.config.floatX)
-we_batches_it = we_it.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rng)
+print('Loading Hindi embeddings...')
+we_hi = WordEmbeddings()
+we_hi.load_from_word2vec('./models/wv_hindi')
+we_hi.downsample_frequent_words()
+skn_hi = StandardScaler()
+we_hi.vectors = skn_hi.fit_transform(we_hi.vectors).astype(theano.config.floatX)
+we_batches_hi = we_hi.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rng)
 
 print >> sys.stderr, 'Loading English embeddings...'
 we_en = WordEmbeddings()
-we_en.load_from_word2vec('./en-m50000')
+we_en.load_from_word2vec('./models/wv_english')
 we_en.downsample_frequent_words()
 skn_en = StandardScaler()
 we_en.vectors = skn_en.fit_transform(we_en.vectors).astype(theano.config.floatX)
 we_batches_en = we_en.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rng)
-
 print >> sys.stderr, 'Ready to train.'
 
 print >> sys.stderr, 'Training...'

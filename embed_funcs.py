@@ -15,9 +15,9 @@ class WordEmbeddings(object):
         self.probs = np.zeros(0)
         self.word_dict = dict([])
 
-	def load_from_fasttext(self, file_prefix):
-		# vocab_file = file_prefix + '.vocab'
-		vec_file = file_prefix + '.vec'
+	def load_from_word2vec(self, file_prefix):
+		vocab_file = file_prefix + '.vocab'
+		vec_file = file_prefix + '.bin'
                 
 		vec_fs = open(vec_file)
 		line = vec_fs.readline()
