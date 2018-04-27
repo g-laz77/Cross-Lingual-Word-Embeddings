@@ -11,36 +11,48 @@ class WordEmbeddings(object):
 		self.words = []
 		self.embedding_dim = 0
 		self.vectors = np.zeros((0, 0))
-		# self.counts = np.zeros(0, dtype=int)
-        self.probs = np.zeros(0)
-        self.word_dict = dict([])
+		self.counts = np.zeros(0, dtype=int)
+		self.probs = np.zeros(0)
+		self.word_dict = dict([])
 
 	def load_from_word2vec(self, file_prefix):
 		vocab_file = file_prefix + '.vocab'
 		vec_file = file_prefix + '.bin'
-                
+      		      		  		  
 		vec_fs = open(vec_file)
 		line = vec_fs.readline()
+		
+
 		tokens = line.split()
-		self.counts = np.zeros(self.num_words, dtype=int)                       # count of each word in vocab
-		self.num_words = int(tokens[0])                                         # number of unique words( size of vocab)
-		self.embedding_dim = int(tokens[1])                                     # embedding dimensions (typically 300)
-		self.vectors = np.zeros((self.num_words, self.embedding_dim))           # Embedding matrix
-		self.probs = np.ones(self.num_words)                                    # word probabilities
+		self.num_words = int(tokens[0])      		      		  		      		  		      		  		      		  		   # number of unique words( size of vocab)		
+		self.counts = np.zeros(self.num_words, dtype=int)      		      		  		      		   # count of each word in vocab
+		self.embedding_dim = int(tokens[1])      		      		  		      		  		      		  		       # embedding dimensions (typically 300)
+		self.vectors = np.zeros((self.num_words, self.embedding_dim))      		     # Embedding matrix
+		self.probs = np.ones(self.num_words)      		      		  		      		  		      		  		      # word probabilities
+		c1 = 0 
 		for i, line in enumerate(vec_fs):
+			if not line or line == "\n":
+				continue
 			tokens = line.split()
 			word = tokens[0]
 			self.words.append(word)
 			self.word_dict[word] = i
 			self.vectors[i] = [float(x) for x in tokens[1:]]
+			c1 = i
 
 		vocab_fs = open(vocab_file)
 		for line in vocab_fs:
-			tokens = line.split()
+			if not line or line == "\n":
+				continue
+			tokens = line.split(":")
+			print(line)
 			word, count = tokens[0], int(tokens[1])
-			self.counts[self.word_dict[word]] = count
+			if word in self.word_dict:
+				print("Count:",count," word:",word," Dict key:",self.word_dict[word])
+				self.counts[self.word_dict[word]] = count
+			
 
-		self.total_count = self.counts.sum()                                # total number of words
+		self.total_count = self.counts.sum()      		      		  		      		  		      		  		  # total number of words
 		self.probs = self.probs * self.counts
 		self.probs = self.probs / self.total_count   # calculating all probabilities
 
@@ -59,9 +71,9 @@ class WordEmbeddings(object):
 		if not train_set_ids == None:
 			p = self.probs[train_set_ids]
 			p /= p.sum()
-			a = train_set_ids            
+			a = train_set_ids      		      
 		else:
-			p = self.probs            
+			p = self.probs      		      
 			a = self.num_words
 		while 1:
 			rv = rng.choice(a, size=batch_size, replace=True, p=p)

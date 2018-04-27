@@ -1,6 +1,7 @@
+import pickle as cPickle
+
 import sys
 import numpy as np
-import cPickle
 from sklearn.utils import check_random_state
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -9,7 +10,7 @@ import theano
 import theano.tensor as T
 import lasagne
 
-from embeddings import WordEmbeddings
+from embed_funcs import WordEmbeddings
 
 #theano.config.optimizer='None'
 #theano.config.exception_verbosity='high'
@@ -17,7 +18,7 @@ from embeddings import WordEmbeddings
 DISCR_HIDDEN_DIM = 600
 DISCR_NUM_HIDDEN_LAYERS = 10
 HALF_BATCH_SIZE = 128
-d = 40
+d = 100
 ADV_PENALTY = 1.0
 #ADV_PENALTY = 0.1
 COS_PENALTY = 1.0
@@ -46,7 +47,7 @@ class Discriminator(object):
 		self.hidden2out_dropout_p = hidden2out_dropout_p
 		self.update_hyperparameters = update_hyperparams
 	
-		print >> sys.stderr, 'Building computation graph for discriminator...'		
+		print('Building computation graph for discriminator...')
 		self.input_var = T.matrix('input')
 		self.target_var = T.matrix('targer')
 
@@ -54,7 +55,7 @@ class Discriminator(object):
 		self.l_in_dr = lasagne.layers.DropoutLayer(self.l_in, self.in_dropout_p)
 		self.l_prehid = lasagne.layers.batch_norm(lasagne.layers.DenseLayer(self.l_in_dr, num_units=self.hidden_dim, nonlinearity=lasagne.nonlinearities.leaky_rectify, W=lasagne.init.GlorotUniform(gain=leaky_relu_gain), name='l_prehid'))
 		self.layers = [self.l_in, self.l_in_dr, self.l_prehid]
-		for i in xrange(self.num_hidden_layers):
+		for i in range(self.num_hidden_layers):
 			l_hid_predr = lasagne.layers.DropoutLayer(self.layers[-1], self.hidden_dropout_p)
 			l_hid = lasagne.layers.batch_norm(lasagne.layers.DenseLayer(l_hid_predr, num_units=self.hidden_dim, nonlinearity=lasagne.nonlinearities.leaky_rectify, W=lasagne.init.GlorotUniform(gain=leaky_relu_gain), name=('l_hid_%s' % i)))
 			l_hid_sum = lasagne.layers.ElemwiseSumLayer([self.layers[-1], l_hid])
@@ -73,7 +74,7 @@ class Discriminator(object):
 		self.params = lasagne.layers.get_all_params(self.l_out, trainable=True)
 		self.updates = lasagne.updates.adam(self.loss, self.params, **update_hyperparams)
 
-		print >> sys.stderr, 'Compiling discriminator...'
+		print ('Compiling discriminator...')
 		self.train_fn = theano.function([self.input_var, self.target_var], [self.loss, self.accuracy], updates=self.updates)
 		self.eval_fn = theano.function([self.input_var, self.target_var], [self.loss, self.accuracy])
 
@@ -86,7 +87,7 @@ discriminator_1 = Discriminator(d, DISCR_NUM_HIDDEN_LAYERS, DISCR_NUM_HIDDEN_LAY
 X = np.zeros((2*HALF_BATCH_SIZE, d), dtype=theano.config.floatX)
 target_mat = np.vstack([np.ones((HALF_BATCH_SIZE, 1)), np.zeros((HALF_BATCH_SIZE, 1))]).astype(theano.config.floatX) # En = 1, It = 0
 
-print >> sys.stderr, 'Building computation graph for generator...'
+print('Building computation graph for generator...')
 
 gen_input_var = T.matrix('gen_input_var')
 gen_adversarial_input_var = T.matrix('gen_adversarial_input')
@@ -123,7 +124,7 @@ recon_and_cos_gen_updates = lasagne.updates.adam(recon_gen_loss + COS_PENALTY * 
 
 grad_norm = T.grad(adv_gen_loss, generation).norm(2, axis=1).mean()
 
-print >> sys.stderr, 'Compiling generator...'
+print('Compiling generator...')
 gen_fn = theano.function([gen_input_var], deterministic_generation)
 recon_fn = theano.function([gen_input_var], deterministic_reconstruction)
 gen_train_pred_grad_norm_fn = theano.function([gen_input_var, gen_adversarial_input_var], [gen_loss, recon_gen_loss, adv_gen_loss, cos_gen_loss, deterministic_generation, grad_norm], updates=gen_updates)
@@ -133,9 +134,10 @@ gen_eval_pred_grad_norm_fn  = theano.function([gen_input_var, gen_adversarial_in
 accumulators = np.zeros(11)
 
 def train_batch(batch_id = 1, print_every_n = 1):
-	id_it = next(we_batches_it)
+	id_hi = next(we_batches_hi)
 	id_en = next(we_batches_en)
-	X[HALF_BATCH_SIZE:] = we_it.vectors[id_it]
+	# print(id_hi,HALF_BATCH_SIZE )
+	X[HALF_BATCH_SIZE:] = we_hi.vectors[id_hi]
 	X[:HALF_BATCH_SIZE] = we_en.vectors[id_en]
 
 	skip_generator = (batch_id > 1) and (accumulators[0] < 0.51)
@@ -159,7 +161,7 @@ def train_batch(batch_id = 1, print_every_n = 1):
 		accumulators[:] = ACCUMULATOR_EXPAVG * np.array([accuracy_val, loss_val, alt_accuracy_val, alt_loss_val, gen_loss_val, recon_gen_loss_val, adv_gen_loss_val, cos_gen_loss_val, float(skip_generator), float(skip_discriminator), preout_grad_norm_val]) + (1.0 - ACCUMULATOR_EXPAVG) * accumulators
 
 	if batch_id % print_every_n == 0:
-		print >> sys.stderr, 'batch: %s, acc: %s, loss: %s, alt acc: %s, alt loss: %s, gloss: %s, grloss: %s, galoss: %s, gcloss: %s, gskip: %s, dskip: %s, gn: %s' % tuple([batch_id] + accumulators.tolist())
+		print('batch: %s, acc: %s, loss: %s, alt acc: %s, alt loss: %s, gloss: %s, grloss: %s, galoss: %s, gcloss: %s, gskip: %s, dskip: %s, gn: %s' % tuple([batch_id] + accumulators.tolist()))
 
 def save_model():
 	params_vals = lasagne.layers.get_all_param_values([discriminator_0.l_out, discriminator_1.l_out, gen_l_out])
@@ -173,20 +175,20 @@ skn_hi = StandardScaler()
 we_hi.vectors = skn_hi.fit_transform(we_hi.vectors).astype(theano.config.floatX)
 we_batches_hi = we_hi.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rng)
 
-print >> sys.stderr, 'Loading English embeddings...'
+print('Loading English embeddings...')
 we_en = WordEmbeddings()
 we_en.load_from_word2vec('./models/wv_english')
 we_en.downsample_frequent_words()
 skn_en = StandardScaler()
 we_en.vectors = skn_en.fit_transform(we_en.vectors).astype(theano.config.floatX)
 we_batches_en = we_en.sample_batches(batch_size=HALF_BATCH_SIZE, random_state=rng)
-print >> sys.stderr, 'Ready to train.'
+print('Ready to train.')
 
-print >> sys.stderr, 'Training...'
-for i in xrange(10000000):
+print('Training...')
+for i in range(10000000):
 	train_batch(i+1, 100)
 	if ((i+1) % 10000) == 0:
-		print >> sys.stderr, 'Saving model...'
+		print('Saving model...')
 		save_model()
-print >> sys.stderr, 'Saving model...'
+print('Saving model...')
 save_model()
